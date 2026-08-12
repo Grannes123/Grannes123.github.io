@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deep — Azure, AVD, Citrix, Omnissa, AI &amp; Infra notes</title>
+<meta name="description" content="Field notes on Azure, AVD, Citrix, Omnissa, AI, GitHub and the infrastructure that ties it all together.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #081B2E;
+    --navy-2: #123C61;
+    --azure: #0078D4;
+    --cyan: #35D6C4;
+    --paper: #EEF3FB;
+    --paper-dim: #E1EAF6;
+    --card: #FFFFFF;
+    --ink: #12202F;
+    --ink-soft: #56697D;
+    --line: #DCE6F2;
+
+    --c-azure: #0078D4;
+    --c-avd: #00B7C3;
+    --c-citrix: #E8590C;
+    --c-omnissa: #7C5CFC;
+    --c-ai: #D99A1B;
+    --c-github: #8957E5;
+    --c-infra: #2AC3DE;
+
+    --font-display: 'Sora', sans-serif;
+    --font-body: 'Manrope', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    margin: 0;
+    line-height: 1.6;
+  }
+  a { color: inherit; }
+
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 24px; }
+
+  header.site {
+    background: var(--navy);
+    color: var(--paper);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  header.site .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 9px; font-family: var(--font-display); font-weight: 700; font-size: 21px; letter-spacing: -0.01em; }
+  .brand .pulse-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 0 0 rgba(42,195,222,0.6); animation: ping 2.2s ease-out infinite; }
+  @keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(42,195,222,0.55); } 70% { box-shadow: 0 0 0 8px rgba(42,195,222,0); } 100% { box-shadow: 0 0 0 0 rgba(42,195,222,0); } }
+  .site-tag { font-family: var(--font-mono); font-size: 11.5px; color: #9FB3C8; letter-spacing: 0.03em; }
+
+  .hero { background: linear-gradient(160deg, var(--navy) 0%, var(--navy-2) 100%); color: var(--paper); padding: 54px 0 20px; overflow: hidden; }
+  .hero .wrap { display: flex; align-items: center; gap: 30px; flex-wrap: wrap; }
+  .hero-copy { flex: 1 1 320px; min-width: 280px; }
+  .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin: 0 0 14px; }
+  .hero h1 { font-family: var(--font-display); font-size: clamp(30px, 4.4vw, 44px); line-height: 1.12; margin: 0 0 16px; max-width: 13ch; }
+  .hero p { color: #B9CADB; font-size: 15.5px; max-width: 48ch; margin: 0 0 8px; }
+
+  .graph-wrap { flex: 0 0 300px; width: 300px; }
+  .graph-wrap svg { width: 100%; height: auto; display: block; }
+  .node-line { stroke: rgba(255,255,255,0.16); stroke-width: 1.4; }
+  .node-pulse { stroke-width: 2; stroke-linecap: round; fill: none; stroke-dasharray: 10 190; stroke-dashoffset: 200; animation: travel 3.2s linear infinite; }
+  @keyframes travel { to { stroke-dashoffset: -190; } }
+  .node-dot { stroke: var(--navy); stroke-width: 3; }
+  .node-center circle { fill: var(--paper); }
+  .node-center text { fill: var(--navy); font-family: var(--font-display); font-weight: 700; font-size: 15px; }
+  .node-label { font-family: var(--font-mono); font-size: 9.5px; fill: #C6D4E3; letter-spacing: 0.02em; }
+  @media (prefers-reduced-motion: reduce) { .node-pulse, .pulse-dot { animation: none; } }
+
+  .filters { background: var(--navy-2); padding: 16px 0 22px; }
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.02em;
+    padding: 6px 13px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.18);
+    background: transparent; color: #C6D4E3; cursor: pointer; transition: all .15s ease;
+  }
+  .chip:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+  .chip.active { background: var(--cyan); border-color: var(--cyan); color: var(--navy); font-weight: 600; }
+
+  .posts-section { padding: 38px 0 20px; }
+  .section-label {
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-soft); margin: 0 0 18px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+  .post-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+  .post-card {
+    background: var(--card); border: 1px solid var(--line); border-top: 3px solid var(--tag-color, var(--azure));
+    border-radius: 12px; padding: 22px; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(10,31,51,0.04);
+    transition: box-shadow .15s ease, transform .15s ease;
+  }
+  .post-card:hover { box-shadow: 0 8px 22px rgba(10,31,51,0.1); transform: translateY(-2px); }
+
+  .post-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .date { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); }
+  .tag-chip {
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.02em; padding: 2px 8px; border-radius: 3px;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .tag-chip .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  .post-card h2 { font-family: var(--font-display); font-size: 18px; margin: 0 0 8px; letter-spacing: -0.01em; line-height: 1.3; }
+  .excerpt { color: var(--ink-soft); font-size: 14px; margin: 0; }
+  .post-body { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); font-size: 14.5px; }
+  .post-body p { margin: 0 0 10px; }
+  .post-card.open .post-body { display: block; }
+  .post-card.open .excerpt { display: none; }
+  .read-toggle { font-family: var(--font-mono); font-size: 11.5px; color: var(--azure); margin-top: 8px; display: inline-block; }
+  .post-card.hidden { display: none; }
+
+  footer.site { background: var(--paper-dim); border-top: 1px solid var(--line); padding: 26px 0 34px; margin-top: 30px; }
+  footer.site .footer-title { font-family: var(--font-display); font-size: 14px; margin: 0 0 6px; }
+  footer.site p { font-size: 13px; color: var(--ink-soft); margin: 0; }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <div class="brand"><span class="pulse-dot"></span>Deep</div>
+    <div class="site-tag">AZURE · AVD · CITRIX · OMNISSA · AI · GITHUB · INFRA</div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-copy">
+      <p class="eyebrow">Field notes · 12+ years in infra</p>
+      <h1>Signal across the whole stack.</h1>
+      <p>Notes on Azure, AVD, Citrix, Omnissa, AI, and GitHub — and the infrastructure holding all of it together — written by someone who gets paged when it breaks.</p>
+    </div>
+    <div class="graph-wrap">
+      <svg viewBox="0 0 500 360" xmlns="http://www.w3.org/2000/svg">
+        <line class="node-line" x1="250" y1="190" x2="250" y2="50"/>
+        <line class="node-line" x1="250" y1="190" x2="359" y2="103"/>
+        <line class="node-line" x1="250" y1="190" x2="387" y2="221"/>
+        <line class="node-line" x1="250" y1="190" x2="311" y2="316"/>
+        <line class="node-line" x1="250" y1="190" x2="189" y2="316"/>
+        <line class="node-line" x1="250" y1="190" x2="113" y2="221"/>
+        <line class="node-line" x1="250" y1="190" x2="141" y2="103"/>
+        <line class="node-pulse" style="stroke:var(--c-azure); animation-delay:0s" x1="250" y1="190" x2="250" y2="50"/>
+        <line class="node-pulse" style="stroke:var(--c-avd); animation-delay:.3s" x1="250" y1="190" x2="359" y2="103"/>
+        <line class="node-pulse" style="stroke:var(--c-citrix); animation-delay:.6s" x1="250" y1="190" x2="387" y2="221"/>
+        <line class="node-pulse" style="stroke:var(--c-omnissa); animation-delay:.9s" x1="250" y1="190" x2="311" y2="316"/>
+        <line class="node-pulse" style="stroke:var(--c-ai); animation-delay:1.2s" x1="250" y1="190" x2="189" y2="316"/>
+        <line class="node-pulse" style="stroke:var(--c-github); animation-delay:1.5s" x1="250" y1="190" x2="113" y2="221"/>
+        <line class="node-pulse" style="stroke:var(--c-infra); animation-delay:1.8s" x1="250" y1="190" x2="141" y2="103"/>
+        <circle class="node-dot" cx="250" cy="50" r="7" fill="var(--c-azure)"/>
+        <text class="node-label" x="250" y="34" text-anchor="middle">AZURE</text>
+        <circle class="node-dot" cx="359" cy="103" r="7" fill="var(--c-avd)"/>
+        <text class="node-label" x="378" y="99" text-anchor="start">AVD</text>
+        <circle class="node-dot" cx="387" cy="221" r="7" fill="var(--c-citrix)"/>
+        <text class="node-label" x="406" y="226" text-anchor="start">CITRIX</text>
+        <circle class="node-dot" cx="311" cy="316" r="7" fill="var(--c-omnissa)"/>
+        <text class="node-label" x="311" y="338" text-anchor="middle">OMNISSA</text>
+        <circle class="node-dot" cx="189" cy="316" r="7" fill="var(--c-ai)"/>
+        <text class="node-label" x="189" y="338" text-anchor="middle">AI</text>
+        <circle class="node-dot" cx="113" cy="221" r="7" fill="var(--c-github)"/>
+        <text class="node-label" x="94" y="226" text-anchor="end">GITHUB</text>
+        <circle class="node-dot" cx="141" cy="103" r="7" fill="var(--c-infra)"/>
+        <text class="node-label" x="122" y="99" text-anchor="end">INFRA</text>
+        <g class="node-center">
+          <circle cx="250" cy="190" r="30"/>
+          <text x="250" y="196" text-anchor="middle">Deep</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="filters">
+  <div class="wrap">
+    <div class="filter-row" id="filter-row">
+      <button class="chip active" data-filter="all">All</button>
+      <button class="chip" data-filter="azure">Azure</button>
+      <button class="chip" data-filter="avd">AVD</button>
+      <button class="chip" data-filter="citrix">Citrix</button>
+      <button class="chip" data-filter="omnissa">Omnissa</button>
+      <button class="chip" data-filter="ai">AI</button>
+      <button class="chip" data-filter="github">GitHub</button>
+      <button class="chip" data-filter="infra">Infra</button>
+    </div>
+  </div>
+</section>
+
+<section class="posts-section">
+  <div class="wrap">
+    <div class="section-label">Latest posts</div>
+    <div class="post-grid" id="post-grid"></div>
+  </div>
+</section>
+
+<footer class="site">
+  <div class="wrap">
+    <p class="footer-title">About this page</p>
+    <p>Written and edited by Deep — IT infrastructure &amp; cloud operations, 12+ years across Azure, Citrix, AVD, Omnissa, and enterprise environments. New posts are added over time.</p>
+  </div>
+</footer>
+
+<script>
+  const tagMeta = {
+    azure:   { label: "Azure",   color: "var(--c-azure)" },
+    avd:     { label: "AVD",     color: "var(--c-avd)" },
+    citrix:  { label: "Citrix",  color: "var(--c-citrix)" },
+    omnissa: { label: "Omnissa", color: "var(--c-omnissa)" },
+    ai:      { label: "AI",      color: "var(--c-ai)" },
+    github:  { label: "GitHub",  color: "var(--c-github)" },
+    infra:   { label: "Infra",   color: "var(--c-infra)" }
+  };
+
+  const posts = [
+    {
+      date: "2026-08-10",
+      tags: ["azure", "ai"],
+      title: "What Azure AI Foundry actually changes for infra teams",
+      excerpt: "Most of the AI Foundry writeups are aimed at developers. Here's what it means if your job is keeping the platform running underneath it.",
+      body: [
+        "Everyone's writing about Azure AI Foundry from the model-building side. Fewer people are asking what it means operationally — identity boundaries, network egress for model endpoints, and how it reshapes what 'a workload' even means on a tenant you already manage.",
+        "The short version from where I sit: it's another set of resources that need Conditional Access thought through before day one, not retrofitted after someone spins up an endpoint on a Tuesday."
+      ]
+    },
+    {
+      date: "2026-07-22",
+      tags: ["citrix", "infra"],
+      title: "FSLogix container detachment: the pattern behind the black screen",
+      excerpt: "A recurring Citrix VDI black-screen issue traced back to how FSLogix handles container detachment under load — notes from the field.",
+      body: [
+        "Black screen on login, session shows as active in the console, user sees nothing. The usual suspects — profile corruption, GPU driver mismatch — weren't it this time.",
+        "The pattern was container detachment timing during peak logon load. Worth checking your VHD(X) attach/detach event timing before chasing anything else."
+      ]
+    },
+    {
+      date: "2026-06-30",
+      tags: ["omnissa", "github", "infra"],
+      title: "Automating repetitive Omnissa Horizon tasks with GitHub Actions",
+      excerpt: "Moving routine Horizon admin tasks out of ad-hoc scripts and into scheduled GitHub Actions workflows — what worked and what didn't.",
+      body: [
+        "A lot of Horizon environment upkeep is repetitive enough to automate, but small enough that it never gets prioritized as a 'real' project.",
+        "Wiring PowerShell scripts into scheduled GitHub Actions runs gave the work version history, visibility, and a paper trail — without standing up a full CI/CD platform for what's still a fairly small set of tasks."
+      ]
+    }
+  ];
+
+  const grid = document.getElementById('post-grid');
+
+  function render() {
+    grid.innerHTML = posts.map((p, i) => {
+      const primary = tagMeta[p.tags[0]].color;
+      const tagsHtml = p.tags.map(t =>
+        `<span class="tag-chip" style="background:${tagMeta[t].color}22; color:${tagMeta[t].color}"><span class="dot"></span>${tagMeta[t].label}</span>`
+      ).join('');
+      const bodyHtml = p.body.map(par => `<p>${par}</p>`).join('');
+      return `
+        <article class="post-card" style="--tag-color:${primary}" data-tags="${p.tags.join(' ')}" data-index="${i}">
+          <div class="post-meta"><span class="date">${p.date}</span>${tagsHtml}</div>
+          <h2>${p.title}</h2>
+          <p class="excerpt">${p.excerpt}</p>
+          <div class="post-body">${bodyHtml}<span class="read-toggle">↑ Collapse</span></div>
+        </article>`;
+    }).join('');
+
+    grid.querySelectorAll('.post-card').forEach(el => {
+      el.addEventListener('click', () => el.classList.toggle('open'));
+    });
+  }
+
+  render();
+
+  document.getElementById('filter-row').addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+    document.querySelectorAll('.post-card').forEach(card => {
+      const tags = card.dataset.tags.split(' ');
+      card.classList.toggle('hidden', filter !== 'all' && !tags.includes(filter));
+    });
+  });
+</script>
+</body>
+</html>
